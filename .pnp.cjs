@@ -31,6 +31,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@mdi/font", "npm:7.0.96"],\
             ["@mdi/js", "npm:7.2.96"],\
             ["@vitejs/plugin-vue", "virtual:cf5f55619ba3a2d24ed07f4319269a4141d14a079c05bcd678fe20a7f26dc085ae1decc894c7cfe97f42c6ca56217b05d747004549af0379712a88f77496fd1d#npm:4.2.3"],\
+            ["csvtojson", "npm:2.0.10"],\
             ["eslint", "npm:8.44.0"],\
             ["eslint-plugin-vue", "virtual:cf5f55619ba3a2d24ed07f4319269a4141d14a079c05bcd678fe20a7f26dc085ae1decc894c7cfe97f42c6ca56217b05d747004549af0379712a88f77496fd1d#npm:9.15.1"],\
             ["pinia", "virtual:cf5f55619ba3a2d24ed07f4319269a4141d14a079c05bcd678fe20a7f26dc085ae1decc894c7cfe97f42c6ca56217b05d747004549af0379712a88f77496fd1d#npm:2.1.4"],\
@@ -845,6 +846,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["bluebird", [\
+        ["npm:3.7.2", {\
+          "packageLocation": "./.yarn/cache/bluebird-npm-3.7.2-6a54136ee3-869417503c.zip/node_modules/bluebird/",\
+          "packageDependencies": [\
+            ["bluebird", "npm:3.7.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["boolbase", [\
         ["npm:1.0.0", {\
           "packageLocation": "./.yarn/cache/boolbase-npm-1.0.0-965fe9af6d-3e25c80ef6.zip/node_modules/boolbase/",\
@@ -1013,6 +1023,18 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/csstype-npm-3.1.2-cead7d99b2-e1a52e6c25.zip/node_modules/csstype/",\
           "packageDependencies": [\
             ["csstype", "npm:3.1.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["csvtojson", [\
+        ["npm:2.0.10", {\
+          "packageLocation": "./.yarn/cache/csvtojson-npm-2.0.10-6e4b1552be-5312b054cd.zip/node_modules/csvtojson/",\
+          "packageDependencies": [\
+            ["csvtojson", "npm:2.0.10"],\
+            ["bluebird", "npm:3.7.2"],\
+            ["lodash", "npm:4.17.21"],\
+            ["strip-bom", "npm:2.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -1334,6 +1356,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@mdi/font", "npm:7.0.96"],\
             ["@mdi/js", "npm:7.2.96"],\
             ["@vitejs/plugin-vue", "virtual:cf5f55619ba3a2d24ed07f4319269a4141d14a079c05bcd678fe20a7f26dc085ae1decc894c7cfe97f42c6ca56217b05d747004549af0379712a88f77496fd1d#npm:4.2.3"],\
+            ["csvtojson", "npm:2.0.10"],\
             ["eslint", "npm:8.44.0"],\
             ["eslint-plugin-vue", "virtual:cf5f55619ba3a2d24ed07f4319269a4141d14a079c05bcd678fe20a7f26dc085ae1decc894c7cfe97f42c6ca56217b05d747004549af0379712a88f77496fd1d#npm:9.15.1"],\
             ["pinia", "virtual:cf5f55619ba3a2d24ed07f4319269a4141d14a079c05bcd678fe20a7f26dc085ae1decc894c7cfe97f42c6ca56217b05d747004549af0379712a88f77496fd1d#npm:2.1.4"],\
@@ -1765,6 +1788,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/is-path-inside-npm-3.0.3-2ea0ef44fd-abd50f0618.zip/node_modules/is-path-inside/",\
           "packageDependencies": [\
             ["is-path-inside", "npm:3.0.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["is-utf8", [\
+        ["npm:0.2.1", {\
+          "packageLocation": "./.yarn/cache/is-utf8-npm-0.2.1-46ab364e2f-167ccd2be8.zip/node_modules/is-utf8/",\
+          "packageDependencies": [\
+            ["is-utf8", "npm:0.2.1"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -2637,6 +2669,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["strip-ansi", "npm:7.1.0"],\
             ["ansi-regex", "npm:6.0.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["strip-bom", [\
+        ["npm:2.0.0", {\
+          "packageLocation": "./.yarn/cache/strip-bom-npm-2.0.0-5c4b64ed5a-08efb746bc.zip/node_modules/strip-bom/",\
+          "packageDependencies": [\
+            ["strip-bom", "npm:2.0.0"],\
+            ["is-utf8", "npm:0.2.1"]\
           ],\
           "linkType": "HARD"\
         }]\
