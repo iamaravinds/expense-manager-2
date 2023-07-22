@@ -18,12 +18,14 @@
         <v-btn @click="upload">Upload</v-btn>
       </v-card>
     </v-col>
+  </v-row>
+  <v-row>
     <v-col cols="12">
       <v-table
         density="compact"
         v-if="transactions?.length"
         fixed-header
-        height="700px"
+        height="80vh"
       >
         <thead>
           <tr>
@@ -56,6 +58,9 @@
           </tr>
         </tbody>
       </v-table>
+      <v-card v-else-if="uploadTransactionLoading" class="empty-transactions">
+        Loading Please wait
+      </v-card>
       <v-card v-else class="empty-transactions">
         Upload Transactions to see the magic here🪄...
       </v-card>
@@ -77,6 +82,7 @@ export default {
     const state = reactive({
       file: null,
       transactions: [],
+      uploadTransactionLoading: false,
     });
     const formatDate = computed(() => {
       return (date) => {
@@ -89,6 +95,7 @@ export default {
     }
     async function triggerConversion(params) {
       console.log("params", params);
+      state.uploadTransactionLoading = true;
       let reader = new FileReader();
       let content;
       reader.readAsBinaryString(params[0]);
@@ -98,7 +105,12 @@ export default {
       setTimeout(async () => {
         console.log("wait over");
         await convertCsvToJson(content);
-        console.log("data", data.value);
+        if (!error.value) {
+          await appStore.uploadTransactions(data.value);
+          const allTransactions = await appStore.getAllTransactions();
+          state.transactions = allTransactions;
+        }
+        state.uploadTransactionLoading = false;
         console.log("error", error.value);
       }, 3000);
     }

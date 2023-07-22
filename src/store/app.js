@@ -8,8 +8,16 @@ export const useAppStore = defineStore("app", {
       const transactions = await axiosCall(
         `/transaction?clientId=${this.clientId}`
       );
-      console.log("transactions", transactions.data);
       this.transactions = transactions.data;
+      return transactions.data;
+    },
+    async uploadTransactions(transactionsData) {
+      const transactions = await axiosCall.post(`/transaction`, {
+        data: {
+          clientId: this.clientId,
+          transactions: transactionsData,
+        },
+      });
       return transactions.data;
     },
   },
