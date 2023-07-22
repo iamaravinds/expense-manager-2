@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "@mdi/font": "7.0.96",
+    "axios": "^1.4.0",
     "csvtojson": "^2.0.10",
+    "moment": "^2.29.4",
     "pinia": "^2.0.23",
     "roboto-fontface": "*",
     "vue": "^3.2.0",
@@ -22,6 +24,7 @@
     "@vitejs/plugin-vue": "^4.0.0",
     "eslint": "^8.22.0",
     "eslint-plugin-vue": "^9.3.0",
+    "sass": "^1.64.1",
     "vite": "^4.2.0",
     "vite-plugin-vuetify": "^1.0.0"
   }
