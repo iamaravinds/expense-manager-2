@@ -16,6 +16,19 @@ export const useAppStore = defineStore("app", {
       this.transactions = transactions.data;
       return transactions.data;
     },
+    async getAnalysedDataByCategory(filter = {}) {
+      let url = `/analyse?clientId=${this.clientId}`;
+      if (filter.from) {
+        url+=`&startDate=${filter.from}`
+      }
+      if (filter.to) {
+        url+=`&endDate=${filter.to}`
+      }
+      const transactions = await axiosCall(url);
+      this.transactions = transactions.data;
+      return transactions.data;
+    },
+
     async uploadTransactions(transactionsData) {
       const transactions = await axiosCall.post(`/transaction`, {
         data: {

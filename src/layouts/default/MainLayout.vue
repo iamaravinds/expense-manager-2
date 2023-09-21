@@ -10,9 +10,13 @@
       <v-divider />
 
       <v-list class="bg-red-lighten-5">
-        <v-list-item v-for="[icon, text] in links" :key="icon" link>
+        <v-list-item
+          v-for="[icon, text, link] in links"
+          :key="icon"
+          :to="link"
+          link>
           <v-list-item-icon>
-            <v-icon :icon="mdiAccount"></v-icon>
+            <v-icon :icon="mdiAccount" ></v-icon>
           </v-list-item-icon>
 
           <v-list-item-content>
@@ -36,7 +40,10 @@ export default {
   data: () => ({
     drawer: null,
     mdiAccount,
-    links: [["mdi-inbox-arrow-down", "Home"]],
+    links: [
+      ["mdi-inbox-arrow-down", "Home", "/"],
+      ["mdi-inbox-arrow-down", "Analyse", "/analyse"],
+    ],
   }),
 };
 </script>
