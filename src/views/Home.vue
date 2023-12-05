@@ -137,6 +137,7 @@ export default {
         { name: "Clothing" },
         { name: "Entertainment" },
         { name: "Festivals" },
+        { name: "Gift" },
         { name: "Investments" },
         { name: "Insurance" },
         { name: "Credit Card" },

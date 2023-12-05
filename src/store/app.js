@@ -47,6 +47,23 @@ export const useAppStore = defineStore("app", {
       });
       return transactions.data;
     },
+    async createBudget(budget, date) {
+      const budgetResponse = await axiosCall.post(`/budget/create`, {
+        clientId: this.clientId,
+        budget,
+        date,
+      });
+      return budgetResponse.data;
+    },
+
+    async getBudget(date) {
+      let url = `/budget?clientId=${this.clientId}`;
+      if (date) {
+        url+=`&date=${date}`
+      }
+      const budgetResponse = await axiosCall.get(url);
+      return budgetResponse.data;
+    },
   },
   state: () => ({
     clientId: "64af5502ef83bb8e6eb1f0bd",
