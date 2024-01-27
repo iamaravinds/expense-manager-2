@@ -41,6 +41,7 @@
       </div>
     </v-col>
   </v-row>
+<!--
   <v-row>
     <v-col
       cols="3"
@@ -87,6 +88,78 @@
       </div>
     </v-col>
   </v-row>
+  -->
+<v-row>
+  <v-col cols="4">
+    <v-data-table
+      :headers="headerData"
+      :items="formattedTransactions"
+      :items-per-page="0"
+      item-value="value"
+      density="compact"
+    >
+      <template v-slot:item.category="{item}">
+        <span
+          style="cursor: pointer"
+          @click="getCategoryBasedItems(item.columns.category)">
+          {{ item.columns.category }}
+        </span>
+      </template>
+      <template v-slot:item.debit="{item}">
+        <span
+          style="cursor: pointer"
+          @click="getCategoryBasedItems(item.columns.category)">
+          {{ item.columns.debit }}
+        </span>
+      </template>
+      <template v-slot:item.credit="{item}">
+        <span
+          style="cursor: pointer"
+          @click="getCategoryBasedItems(item.columns.category)">
+          {{ item.columns.credit }}
+        </span>
+      </template>
+      <template v-slot:item.budget="{item}">
+        <span
+          style="cursor: pointer"
+          @click="getCategoryBasedItems(item.columns.category)">
+          {{ item.columns.budget }}
+        </span>
+      </template>
+
+      <template #bottom></template>
+    </v-data-table>
+  </v-col>
+  <v-col v-if="categoryTransactions.length">
+    <div class="transaction-table">
+      <h2>{{ categoryTransactions[0].category }}</h2>
+      <v-data-table
+        :headers="transactionHeaderData"
+        :items="categoryTransactions"
+        :items-per-page="0"
+        item-value="value"
+        density="compact"
+      >
+        <template #bottom></template>
+        <template v-slot:item.date="{item}">
+          {{ formatDate(item.columns.date) }}
+        </template>
+      </v-data-table>
+      <div class="total-section">
+        <h3>
+          Debit: ₹ {{ getCategoryTotalDebit(categoryTransactions[0].category) }}
+        </h3>
+        <h3>
+          Credit: ₹ {{ getCategoryTotalCredit(categoryTransactions[0].category) }}
+        </h3>
+        <h3>
+          Net : ₹ {{ getCategoryTotalDebit(categoryTransactions[0].category)
+                      - getCategoryTotalCredit(categoryTransactions[0].category) }}
+        </h3>
+      </div>
+    </div>
+  </v-col>
+</v-row>
   <v-dialog width="500" v-model="openBudgetDialoge">
     <template #default>
       <v-card>
@@ -95,7 +168,10 @@
           <tr>
             <th v-for="(item, headerIdx) in headers"
                 :key="'header-' + headerIdx"
-                class="text-left">{{ item.title }}
+                class="text-left">
+              <span @click="getCategoryBasedItems(item.category)">
+                {{ item.title }}
+              </span>
             </th>
           </tr>
           </thead>
@@ -104,7 +180,9 @@
             v-for="(item, valIdx) in categories"
             :key="'valIdx -' + valIdx"
           >
-            <td>{{ item.category }}</td>
+            <td @click="getCategoryBasedItems(item.category)">
+              {{ item.category }}
+            </td>
             <td>
               <v-text-field
                 v-model.number="item.budget"
@@ -139,9 +217,11 @@
 import {useAppStore} from "@/store/app";
 import {computed, onMounted, reactive, ref, toRefs} from "vue";
 import moment from "moment";
+import { VDataTable } from 'vuetify/labs/VDataTable'
 
 export default {
   name: 'analyse-data',
+  components: {VDataTable},
   setup() {
     const appStore = useAppStore();
     const fileInput = ref(null);
@@ -185,8 +265,21 @@ export default {
       itemsPerPage: 5,
       budget: [],
       headers: [
-        { title: "Category", align: 'end', key: 'category'},
-        { title: "Budget", align: 'end', key: 'budget'},
+        { text: 'Category', value: 'category', title: "Category", align: 'end', key: 'category'},
+        { text: 'Budget', value: 'credit', title: "Budget", align: 'end', key: 'budget'},
+      ],
+      headerData: [
+        { title: 'Category', key: 'category'},
+        { title: 'Debit', key: 'debit'},
+        { title: 'Credit', key: 'credit'},
+        { title: 'Budget', key: 'budget'},
+      ],
+      transactionHeaderData: [
+        { title: 'Date', key: 'date'},
+        { title: 'Title', key: 'merchant'},
+        { title: 'Desc', key: 'message'},
+        { title: 'Debit', key: 'debit'},
+        { title: 'Credit', key: 'credit'},
       ],
       categories: [
         { category: "Food", budget: 0, color: '#FF5733' },
@@ -216,6 +309,7 @@ export default {
         { category: "Transfer", budget: 0, color: '#4682B4' },
         { category: "Salary", budget: 0, color: '#BA55D3' },
       ],
+      categoryTransactions: [],
     });
     const formatDate = computed(() => {
       return (date) => {
@@ -225,12 +319,38 @@ export default {
     const getBudgetVal = computed(() => {
       return (categoryVal) => {
         if(state.budget) {
-          return state.budget.budget.find((item) => item.category === categoryVal) || 0
+          return state.budget?.budget?.find((item) => item.category === categoryVal) || 0
         }
         return {};
       }
     });
+    const formattedTransactions = computed(() => {
+      const keys = Object.keys(state.transactions);
+      if(keys.length) {
+        return keys.map((category) => {
+          return {
+            category,
+            debit: state.transactions[category].debit,
+            credit: state.transactions[category].credit,
+            budget: state.budget?.budget?.find((item) => item.category === category).budget || 0
+          }
+        });
+      } return [];
+    });
 
+    const getCategoryTotalDebit = computed(() => {
+      return (category) => formattedTransactions.value.find((item) => item.category === category).debit
+    });
+    const getCategoryTotalCredit = computed(() => {
+      return (category) => formattedTransactions.value.find((item) => item.category === category).credit
+    });
+
+    function getColor (calories) {
+      // if (calories > 100) return 'red'
+      // else if (calories > 50) return 'orange'
+      // else
+      return 'green';
+    }
     function getStartOfMonth(month) {
       return moment()
         .month(month)
@@ -269,6 +389,15 @@ export default {
       console.log(date)
       state.budget = await appStore.createBudget(state.categories, date);
     }
+
+    async function getCategoryBasedItems(category) {
+      console.log('inside')
+      populateMonthFilter();
+      const filter = computeFilter();
+      filter.category = category;
+      state.categoryTransactions = await appStore.getCategoryTransactions(filter);
+    }
+
     onMounted(async () => {
       populateMonthFilter();
       const filter = computeFilter();
@@ -282,9 +411,14 @@ export default {
       fileInput,
       formatDate,
       getBudgetVal,
+      formattedTransactions,
+      getCategoryTotalDebit,
+      getCategoryTotalCredit,
       addBudget,
       createBudget,
       triggerFilterChange,
+      getCategoryBasedItems,
+      getColor,
     };
   },
 };
@@ -297,5 +431,14 @@ export default {
   height: 20px;
   margin-top: -20px;
   margin-left: -20px;
+}
+.transaction-table {
+  border: 0.5px solid gray;
+  border-radius: 10px;
+  padding: 5px;
+}
+.total-section {
+  margin: 5px 10px;
+  right: 0;
 }
 </style>
