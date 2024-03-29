@@ -41,56 +41,8 @@
       </div>
     </v-col>
   </v-row>
-<!--
-  <v-row>
-    <v-col
-      cols="3"
-    >
-      <div>
-        <b>
-          Category
-        </b>
-      </div>
-    </v-col>
-    <v-col
-      cols="3"
-    >
-      <div>
-        <b>
-         Spends
-        </b>
-      </div>
-    </v-col>
-  </v-row>
-  <v-row v-for="(value,key) in transactions"
-         :key="key">
-    <v-col
-      cols="3"
-      >
-        <div>
-          {{ key }}
-        </div>
-    </v-col>
-    <v-col
-      cols="3"
-    >
-      <div>
-        <div
-          :style="{
-            color: ((getBudgetVal(key)?.budget) - (value?.debit)) > 0 ? 'green' : 'red',
-            'font-weight': 'bolder',
-          }"
-        >{{value?.debit || '-'}}
-          <span style="font-weight: normal; font-size: small">
-          ({{ ((getBudgetVal(key)?.budget) - (value?.debit)).toFixed(0) }})
-          </span>
-          </div>
-      </div>
-    </v-col>
-  </v-row>
-  -->
 <v-row>
-  <v-col cols="4">
+  <v-col cols="6">
     <v-data-table
       :headers="headerData"
       :items="formattedTransactions"
@@ -107,14 +59,14 @@
       </template>
       <template v-slot:item.debit="{item}">
         <span
-          style="cursor: pointer"
+          style="cursor: pointer; font-weight: bold"
           @click="getCategoryBasedItems(item.columns.category)">
           {{ item.columns.debit }}
         </span>
       </template>
       <template v-slot:item.credit="{item}">
         <span
-          style="cursor: pointer"
+          style="cursor: pointer; font-weight: bold"
           @click="getCategoryBasedItems(item.columns.category)">
           {{ item.columns.credit }}
         </span>
@@ -122,17 +74,52 @@
       <template v-slot:item.budget="{item}">
         <span
           style="cursor: pointer"
+          class="budget-text"
           @click="getCategoryBasedItems(item.columns.category)">
           {{ item.columns.budget }}
         </span>
       </template>
+      <template v-slot:item.net="{item}">
+        <span
+          style="cursor: pointer"
+          :class="{
+            'green-text': item.columns.net <= item.columns.budget,
+           'red-text': item.columns.net > item.columns.budget,
+          }"
+          @click="getCategoryBasedItems(item.columns.category)">
+          {{ (item.columns.net).toFixed(0) }}
+        </span>
+      </template>
 
-      <template #bottom></template>
+      <template #bottom>
+        Totals:
+      </template>
     </v-data-table>
   </v-col>
-  <v-col v-if="categoryTransactions.length">
+  <v-col cols="6" v-if="categoryTransactions.length">
     <div class="transaction-table">
       <h2>{{ categoryTransactions[0].category }}</h2>
+      <div class="total-section">
+        <h3>
+          Debit: ₹ {{ getCategoryTotalDebit(categoryTransactions[0].category) }}
+        </h3>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <h3>
+          Credit: ₹ {{ getCategoryTotalCredit(categoryTransactions[0].category) }}
+        </h3>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <h3>
+          Budget : {{ getBudgetVal(categoryTransactions?.[0]?.category?.budget) || 0 }}
+        </h3>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <h3 :class="{
+          'green-text': getCategoryTotalCredit(categoryTransactions[0].category) < getBudgetVal(categoryTransactions?.[0]?.category?.budget) || 0,
+          'red-text': getCategoryTotalCredit(categoryTransactions[0].category) >= getBudgetVal(categoryTransactions?.[0]?.category?.budget) || 0,
+            }">
+          Net : ₹ {{ getCategoryTotalDebit(categoryTransactions[0].category)
+        - getCategoryTotalCredit(categoryTransactions[0].category) }}
+        </h3>
+      </div>
       <v-data-table
         :headers="transactionHeaderData"
         :items="categoryTransactions"
@@ -145,18 +132,6 @@
           {{ formatDate(item.columns.date) }}
         </template>
       </v-data-table>
-      <div class="total-section">
-        <h3>
-          Debit: ₹ {{ getCategoryTotalDebit(categoryTransactions[0].category) }}
-        </h3>
-        <h3>
-          Credit: ₹ {{ getCategoryTotalCredit(categoryTransactions[0].category) }}
-        </h3>
-        <h3>
-          Net : ₹ {{ getCategoryTotalDebit(categoryTransactions[0].category)
-                      - getCategoryTotalCredit(categoryTransactions[0].category) }}
-        </h3>
-      </div>
     </div>
   </v-col>
 </v-row>
@@ -273,6 +248,7 @@ export default {
         { title: 'Debit', key: 'debit'},
         { title: 'Credit', key: 'credit'},
         { title: 'Budget', key: 'budget'},
+        { title: 'Net', key: 'net'},
       ],
       transactionHeaderData: [
         { title: 'Date', key: 'date'},
@@ -328,11 +304,13 @@ export default {
       const keys = Object.keys(state.transactions);
       if(keys.length) {
         return keys.map((category) => {
+          const budget = state.budget?.budget?.find((item) => item.category === category).budget || 0
           return {
             category,
             debit: state.transactions[category].debit,
             credit: state.transactions[category].credit,
-            budget: state.budget?.budget?.find((item) => item.category === category).budget || 0
+            net: state.transactions[category].debit - state.transactions[category].credit,
+            budget,
           }
         });
       } return [];
@@ -438,7 +416,19 @@ export default {
   padding: 5px;
 }
 .total-section {
+  display: flex;
   margin: 5px 10px;
   right: 0;
+}
+.green-text {
+  font-weight: bolder;
+  color: green;
+}
+.red-text {
+  font-weight: bolder;
+  color: red;
+}
+.budget-text {
+  font-weight: bold;
 }
 </style>
