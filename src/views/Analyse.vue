@@ -81,18 +81,28 @@
       </template>
       <template v-slot:item.net="{item}">
         <span
-          style="cursor: pointer"
-          :class="{
-            'green-text': item.columns.net <= item.columns.budget,
-           'red-text': item.columns.net > item.columns.budget,
-          }"
-          @click="getCategoryBasedItems(item.columns.category)">
+          style="cursor: pointer; font-weight: bold"
+          @click="getCategoryBasedItems(item.columns.category)"
+        >
           {{ (item.columns.net).toFixed(0) }}
+          <v-icon
+            v-if="item.columns.net > item.columns.budget"
+            :icon="mdiArrowUp"
+            class="red-text"
+          />
+          <v-icon
+            v-else
+            :icon="mdiArrowDown"
+            class="green-text"
+          />
         </span>
+
       </template>
 
       <template #bottom>
-        Totals:
+        <strong>
+          Total Expense: {{ getTotalNet }}
+        </strong>
       </template>
     </v-data-table>
   </v-col>
@@ -108,16 +118,20 @@
           Credit: ₹ {{ getCategoryTotalCredit(categoryTransactions[0].category) }}
         </h3>
         &nbsp;&nbsp;&nbsp;&nbsp;
-        <h3>
-          Budget : {{ getBudgetVal(categoryTransactions?.[0]?.category?.budget) || 0 }}
+        <h3 :class="{
+          'green-text': (getCategoryTotalCredit(categoryTransactions[0].category)
+        - getCategoryTotalDebit(categoryTransactions[0].category)) <= getBudgetVal(categoryTransactions?.[0]?.category)?.budget || 0,
+          'red-text': (getCategoryTotalCredit(categoryTransactions[0].category)
+        - getCategoryTotalDebit(categoryTransactions[0].category)) > getBudgetVal(categoryTransactions?.[0]?.category)?.budget || 0,
+            }">
+          Net : ₹ {{
+            getCategoryTotalCredit(categoryTransactions[0].category)
+              - getCategoryTotalDebit(categoryTransactions[0].category)
+          }}
         </h3>
         &nbsp;&nbsp;&nbsp;&nbsp;
-        <h3 :class="{
-          'green-text': getCategoryTotalCredit(categoryTransactions[0].category) < getBudgetVal(categoryTransactions?.[0]?.category?.budget) || 0,
-          'red-text': getCategoryTotalCredit(categoryTransactions[0].category) >= getBudgetVal(categoryTransactions?.[0]?.category?.budget) || 0,
-            }">
-          Net : ₹ {{ getCategoryTotalDebit(categoryTransactions[0].category)
-        - getCategoryTotalCredit(categoryTransactions[0].category) }}
+        <h3>
+          Budget : {{ getBudgetVal(categoryTransactions?.[0]?.category)?.budget }}
         </h3>
       </div>
       <v-data-table
@@ -190,6 +204,7 @@
 
 <script>
 import {useAppStore} from "@/store/app";
+import {mdiArrowUp, mdiArrowDown, mdiAccount} from "@mdi/js";
 import {computed, onMounted, reactive, ref, toRefs} from "vue";
 import moment from "moment";
 import { VDataTable } from 'vuetify/labs/VDataTable'
@@ -201,6 +216,7 @@ export default {
     const appStore = useAppStore();
     const fileInput = ref(null);
     const state = reactive({
+      mdiArrowUp, mdiArrowDown,
       filter: {
         month: moment().month() + 1,
       },
@@ -247,8 +263,8 @@ export default {
         { title: 'Category', key: 'category'},
         { title: 'Debit', key: 'debit'},
         { title: 'Credit', key: 'credit'},
-        { title: 'Budget', key: 'budget'},
         { title: 'Net', key: 'net'},
+        { title: 'Budget', key: 'budget'},
       ],
       transactionHeaderData: [
         { title: 'Date', key: 'date'},
@@ -309,7 +325,7 @@ export default {
             category,
             debit: state.transactions[category].debit,
             credit: state.transactions[category].credit,
-            net: state.transactions[category].debit - state.transactions[category].credit,
+            net: (state.transactions[category].debit - state.transactions[category].credit),
             budget,
           }
         });
@@ -321,6 +337,9 @@ export default {
     });
     const getCategoryTotalCredit = computed(() => {
       return (category) => formattedTransactions.value.find((item) => item.category === category).credit
+    });
+    const getTotalNet = computed(() => {
+      return formattedTransactions.value.reduce((acc, item) => { acc += item.net; return acc; }, 0).toFixed(2);
     });
 
     function getColor (calories) {
@@ -392,6 +411,7 @@ export default {
       formattedTransactions,
       getCategoryTotalDebit,
       getCategoryTotalCredit,
+      getTotalNet,
       addBudget,
       createBudget,
       triggerFilterChange,
