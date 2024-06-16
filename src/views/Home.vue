@@ -100,10 +100,12 @@
 </template>
 
 <script>
-import { reactive, toRefs, ref, onMounted, computed } from "vue";
-import { useConvertUtils } from "@/composables/utils";
-import { useAppStore } from "@/store/app";
+import {computed, onMounted, reactive, ref, toRefs} from "vue";
+import {useConvertUtils} from "@/composables/utils";
+import {useAppStore} from "@/store/app";
 import moment from "moment";
+import {categoryList} from "@/constants/types";
+
 export default {
   setup() {
     const appStore = useAppStore();
@@ -118,34 +120,7 @@ export default {
       file: null,
       transactions: [],
       uploadTransactionLoading: false,
-      categoryList: [
-        { name: "Food" },
-        { name: "Snacks" },
-        { name: "Travel" },
-        { name: "Swamy" },
-        { name: "Rent" },
-        { name: "Maintenance" },
-        { name: "Grocery" },
-        { name: "Gas" },
-        { name: "Electricity" },
-        { name: "Communication" },
-        { name: "Internet" },
-        { name: "Fuel" },
-        { name: "Medicals" },
-        { name: "Gym" },
-        { name: "Shopping" },
-        { name: "Clothing" },
-        { name: "Entertainment" },
-        { name: "Festivals" },
-        { name: "Gift" },
-        { name: "Investments" },
-        { name: "Insurance" },
-        { name: "Credit Card" },
-        { name: "Loan" },
-        { name: "Others" },
-        { name: "Transfer" },
-        { name: "Salary" },
-      ],
+      categoryList,
     });
     const formatDate = computed(() => {
       return (date) => {
@@ -166,22 +141,54 @@ export default {
       state.uploadTransactionLoading = true;
       let reader = new FileReader();
       let content;
-      reader.readAsBinaryString(params[0]);
+      console.log('params', params)
+      reader.readAsArrayBuffer(params);
       reader.onload = (evt) => {
+        console.log('reading')
         content = reader.result;
       };
-      setTimeout(async () => {
-        console.log("wait over");
-        await convertCsvToJson(content);
-        if (!error.value) {
-          await appStore.uploadTransactions(data.value);
-          const filter = computeFilter();
-          const allTransactions = await appStore.getAllTransactions(filter);
-          state.transactions = allTransactions;
+      reader.onerror = (evt) => {
+        console.log("error", evt);
+      };
+      reader.onloadend = async (evt) => {
+        try {
+          // console.log('done loading', evt);
+          // console.log('content', content);
+          content = reader.result;
+          let decoder = new TextDecoder('utf-8');
+          let csvText = decoder.decode(content);
+          // console.log('csvText', csvText);
+          await convertCsvToJson(csvText)
+            .then(async data => {
+              console.log('data', data);
+              console.log('error.value', error.value);
+              if (!error.value) {
+                await appStore.uploadTransactions(data);
+                const filter = computeFilter();
+                state.transactions = await appStore.getAllTransactions(filter);
+              }
+              state.uploadTransactionLoading = false;
+              console.log("error", error.value);
+            });
+        } catch (err) {
+          console.log("error", err);
+          state.uploadTransactionLoading = false;
         }
-        state.uploadTransactionLoading = false;
-        console.log("error", error.value);
-      }, 3000);
+      }
+
+
+      // setTimeout(async () => {
+        // console.log("wait over");
+        // await convertCsvToJson(content);
+        // if (!error.value) {
+        //   await appStore.uploadTransactions(data.value);
+        //   const filter = computeFilter();
+        //   const allTransactions = await appStore.getAllTransactions(filter);
+        //   state.transactions = allTransactions;
+        // }
+        // state.uploadTransactionLoading = false;
+        // console.log("error", error.value);
+      // }, 15000);
     }
     function populateMonthFilter () {
       const months = [];

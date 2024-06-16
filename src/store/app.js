@@ -82,7 +82,7 @@ export const useAppStore = defineStore("app", {
     },
   },
   state: () => ({
-    clientId: "64af5502ef83bb8e6eb1f0bd",
+    clientId: "666ead3759960fbd623be581",
     transactions: [],
   }),
 });

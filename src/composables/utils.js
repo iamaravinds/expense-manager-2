@@ -8,14 +8,14 @@ export function useConvertUtils() {
   async function convertCsvToJson(string) {
     return csv()
       .fromString(string)
-      .then((result) => (data.value = result))
-      .catch((err) => (error.value = err));
+      .then((result) => (data.value = result));
   }
+
   async function convertCsvFromFileToJson(file) {
     let reader = new FileReader();
     let content;
-    reader.readAsBinaryString(file);
-    reader.onload = (evt) => {
+    reader.readAsArrayBuffer(file);
+    reader.onloadend = (evt) => {
       content = reader.result;
       return csv()
         .fromString(content)
@@ -30,6 +30,7 @@ export function useConvertUtils() {
         });
     };
   }
+
 
   return { convertCsvToJson, convertCsvFromFileToJson, data, error };
 }
